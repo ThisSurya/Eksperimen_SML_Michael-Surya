@@ -1,0 +1,46 @@
+name: Housing Data Cleaning
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - housing_raw.csv
+      - preprocessing/automate_Michael Surya.py
+      - requirements.txt
+      - .github/workflows/data-cleaning.yml
+
+jobs:
+  preprocess:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run preprocessing
+        run: python "preprocessing/automate_Michael Surya.py"
+
+      - name: Validate output
+        run: |
+          test -s preprocessing/housing_preprocessing.csv
+          wc -l preprocessing/housing_preprocessing.csv
+
+      - name: Upload cleaned dataset artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cleaned-housing-dataset
+          path: preprocessing/housing_preprocessing.csv
+          if-no-files-found: error
+          retention-days: 30
